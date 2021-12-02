@@ -26,8 +26,9 @@ import { GameService } from './game.service';
       database: process.env.POSTGRES_DB,
       entities: [Player, Game],
       synchronize: true,
+      autoLoadEntities: true,
     }),
-    
+
     PlayerModule,
   ],
 })

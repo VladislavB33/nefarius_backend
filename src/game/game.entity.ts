@@ -12,22 +12,22 @@ export class Game {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false})
   status: number;
 
-  @Column()
+  @Column({ nullable: false})
   players: number;
 
-  @Column()
+  @Column({ nullable: false})
   laws: boolean;
 
-  @Column({unique: true, nullable: false})
+  @Column({ unique: true, nullable: false})
   name: string;
 
-  @Column()
+  @Column({ nullable: true})
   password: string;
 
-  @Column()
-  winner: number;
+  @Column({ nullable: false})
+  winner: string;
 
 }
