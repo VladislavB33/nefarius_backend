@@ -1,5 +1,12 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
+interface GameCreationAttr{
+  players: number;
+  name: string;
+  password?: string;
+
+}
+
 @Entity()
 export class Game {
   @PrimaryGeneratedColumn()
@@ -14,7 +21,7 @@ export class Game {
   @Column()
   laws: boolean;
 
-  @Column()
+  @Column({unique: true, nullable: false})
   name: string;
 
   @Column()
@@ -22,4 +29,5 @@ export class Game {
 
   @Column()
   winner: number;
+
 }

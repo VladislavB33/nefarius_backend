@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { CreateGameDto } from './dto/create-game-dto';
 import { Game } from './game.entity';
 import { GameService } from './game.service';
 
@@ -17,8 +18,8 @@ export class GameController {
   }
 
   @Post()
-  async create(@Body() body): Promise<void> {
-    await this.gameService.create(body)
+  async createGame(@Body() gameDto: CreateGameDto): Promise<void> {
+    await this.gameService.createGame(gameDto)
   }
 
   @Post('join')

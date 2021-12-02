@@ -1,18 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PlayerController } from './player.controller';
+import { Player } from './player.entity';
+import { PlayerService } from './player.service';
 
 @Module({
+  controllers: [PlayerController],
+  providers: [PlayerService],
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'test',
-      entities: [],
-      synchronize: true,
-    }),
-  ],
+    TypeOrmModule.forFeature([Player])
+  ]
+
 })
-export class AppModule {}
+export class PlayerModule {}
