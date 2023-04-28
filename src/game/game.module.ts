@@ -6,6 +6,7 @@ import { PlayerModule } from 'src/player/player.module';
 import { GameController } from './game.controller';
 import { Game } from './game.entity';
 import { GameService } from './game.service';
+import { GatewayModule } from 'src/gateway/gateway.module';
 
 @Module({
   controllers: [GameController],
@@ -30,6 +31,7 @@ import { GameService } from './game.service';
     }),
 
     PlayerModule,
+    GatewayModule
   ],
 })
 export class GameModule {}
