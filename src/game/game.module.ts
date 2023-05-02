@@ -31,7 +31,7 @@ import { GatewayModule } from 'src/gateway/gateway.module';
     }),
 
     PlayerModule,
-    GatewayModule
+    GatewayModule,
   ],
 })
 export class GameModule {}

@@ -24,6 +24,10 @@ export class GameService {
     return this.gameRepository.findOneBy({ id: gameId });
   }
 
+
+  
+
+
   async remove(id: string): Promise<void> {
     await this.gameRepository.delete(id);
   }

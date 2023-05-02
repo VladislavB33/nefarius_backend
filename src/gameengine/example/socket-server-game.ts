@@ -3,10 +3,12 @@ import { Engine } from '../engine'
 import { Action, InventionCard, Turn, User } from '../types'
 import _ from 'lodash'
 
+
 export enum PlayerStatus {
   REGISTERED,
   STARTED,
-  ERROR
+  ERROR,
+  FINISHED
 }
 
 export enum Method {
@@ -126,7 +128,7 @@ const EXPECTED_PLAYERS = 2
 const players: SocketPlayer[] = []
 let engine: Engine
 
-export async function main(): Promise<number> {
+export async function main(): Promise<number> { 
   const server = net.createServer((socket) => {
     console.log('Connected new client')
     if (players.length >= EXPECTED_PLAYERS) {
