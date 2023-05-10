@@ -35,73 +35,69 @@ export interface SocketMessage {
 export class GameGateway implements OnGatewayConnection {
     handleConnection(client: any, ...args: any[]) {
         console.log('Client connected')
-        //   console.log('Client connected:', client)
-        console.log(client.id);
 
     }
-
-
-
     @WebSocketServer() server: Server;
-    gatewayConection() {
-        this.server.on('connection', (socket) => {
-            console.log('connected'),
-                console.log(socket.id)
-        })
-    }
+    // gatewayConection() {
+    //     this.server.on('connection', (socket) => {
+    //         console.log('connected'),
+    //             console.log(socket.id)
+    //     })
+    // }
 
     private players: SocketPlayer[] = [];
     private engine: Engine;
+    private socket: Socket;
+    private data: string;
 
+    @SubscribeMessage('dataClient')
+    dataClient(@MessageBody() data: string,){
+        console.log(data)
+    }
 
     @SubscribeMessage('data')
     handleData(
         @MessageBody() data: string,
         @ConnectedSocket() socket: Socket) {
-            this.server.emit('data', data)
-            console.log(data)
-            this.processSocket(socket)
-            this.processData(data)
-            return data
+        socket.emit('data', data);
+        this.socket = socket;
+        this.data = data;
+
+    }
+    @SubscribeMessage('start')
+    async start(
+        @ConnectedSocket() socket: Socket)
+     {
+        if (this.players.length >= EXPECTED_PLAYERS) {
+            socket.emit('status', { status: PlayerStatus.ERROR, message: 'This game is full' });
+            socket.disconnect();
+        } else {
+            const player = new SocketPlayer(socket, this.data);
+            this.players.push(player);
+            console.log('Connected new socket')
+            socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
+            if (this.players.length === EXPECTED_PLAYERS) {
+
+                this.startGame();
+            }
         }
-    processSocket(socket) {
-        console.log(socket.id);
-    }
-    processData(data: string) {
-        console.log(data);
     }
 
-    
-        // if (this.players.length >= EXPECTED_PLAYERS) {
-        //   socket.send({ status: PlayerStatus.ERROR, message: 'This game is full' });
-        //   socket.disconnect();
-        // } else {
-        //   const player = new SocketPlayer(socket, data);
-        //   this.players.push(player);
-        //   console.log('Connected new socket')
-        //   socket.send({ status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
-        //   if (this.players.length === EXPECTED_PLAYERS) {
+    async startGame() {
+        for (const player of this.players) {
+            player.socket.emit('status', { status: PlayerStatus.STARTED });
+        }
+        this.engine = new Engine(this.players);
+        const winner = await this.engine.start();
+        const winnerIndex = this.players.findIndex((player) => player === winner);
+        for (const player of this.players) {
+            player.socket.emit('status', { status: PlayerStatus.FINISHED, winnerIndex });
+            player.socket.disconnect()
+        }
 
-        //     this.startGame();
-        //   }
-        // }
-    
 
-    //   async startGame() {
-    //     for (const player of this.players) {
-    //       player.socket.send({ status: PlayerStatus.STARTED });
-    //     }
-    //     this.engine = new Engine(this.players);
-    //     const winner = await this.engine.start();
-    //     const winnerIndex = this.players.findIndex((player) => player === winner);
-    //     for (const player of this.players) {
-    //       player.socket.send({ status: PlayerStatus.FINISHED, winnerIndex });
-    //       player.socket.disconnect()
-    //     }
-
-    //   }
+    }
 }
-
 
 async function sleep(ms: number): Promise<void> {
     return await new Promise((resolve) => {
