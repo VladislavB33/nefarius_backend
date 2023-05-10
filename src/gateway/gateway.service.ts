@@ -1,16 +1,16 @@
 import { Socket } from 'socket.io';
 import { Method, SocketMessage } from 'src/gameengine/example/socket-server-game';
-import { Action, InventionCard, Turn } from 'src/gameengine/types';
+import { Action, InventionCard, Turn, User } from 'src/gameengine/types';
 
-export class SocketPlayer  {
+export class SocketPlayer implements User {
   socket: Socket
   data: string
   waitingFunction: ((answer: SocketMessage) => void) | null = null
   pendingCommand: Method | null = null
 
-  constructor(socket: Socket, data: string) {
+  constructor(socket: Socket) {
     this.socket = socket
-    this._socketDataHandler(data)
+    this.socket.on('data', (data) =>  this._socketDataHandler(data))
   }
 
 
@@ -18,7 +18,7 @@ export class SocketPlayer  {
   _socketDataHandler(bufer: string): void {
     let data = '' + bufer
     const messages = data.split('\r')
-  
+
       data = messages.pop() ?? ''
       if (this.pendingCommand === null) {
         return
@@ -381,4 +381,3 @@ async function sleep(ms: number): Promise<void> {
 //     },
 //     [Symbol(kCapture)]: false
 //   }
-  

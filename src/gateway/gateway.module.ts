@@ -6,6 +6,6 @@ import { GameGateway } from './gamegateway.gateway';
 
 
 @Module({
-  providers: [GameGateway, SocketPlayer, ]
+  providers: [GameGateway ]
 })
 export class GatewayModule {}

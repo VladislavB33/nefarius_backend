@@ -55,15 +55,15 @@ export class GameGateway implements OnGatewayConnection {
         console.log(data)
     }
 
-    @SubscribeMessage('data')
-    handleData(
-        @MessageBody() data: string,
-        @ConnectedSocket() socket: Socket) {
-        socket.emit('data', data);
-        this.socket = socket;
-        this.data = data;
-
-    }
+    // @SubscribeMessage('data')
+    // handleData(
+    //     @MessageBody() data: string,
+    //     @ConnectedSocket() socket: Socket) {
+    //     socket.emit('data', data);
+    //     this.socket = socket;
+    //     this.data = data;
+    //
+    // }
     @SubscribeMessage('start')
     async start(
         @ConnectedSocket() socket: Socket)
@@ -72,7 +72,7 @@ export class GameGateway implements OnGatewayConnection {
             socket.emit('status', { status: PlayerStatus.ERROR, message: 'This game is full' });
             socket.disconnect();
         } else {
-            const player = new SocketPlayer(socket, this.data);
+            const player = new SocketPlayer(socket);
             this.players.push(player);
             console.log('Connected new socket')
             socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
