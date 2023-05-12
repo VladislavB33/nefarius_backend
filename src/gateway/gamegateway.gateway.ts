@@ -3,7 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { Engine } from 'src/gameengine/engine';
 import { Action, InventionCard, Turn } from 'src/gameengine/types';
 import { SocketPlayer } from './gateway.service';
-import { OnModuleInit } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid'
 
 const EXPECTED_PLAYERS = 2;
 export enum PlayerStatus {
@@ -35,35 +35,38 @@ export interface SocketMessage {
 export class GameGateway implements OnGatewayConnection {
     handleConnection(client: any, ...args: any[]) {
         console.log('Client connected')
+        console.log('Client id', client.id)
 
     }
     @WebSocketServer() server: Server;
-    // gatewayConection() {
-    //     this.server.on('connection', (socket) => {
-    //         console.log('connected'),
-    //             console.log(socket.id)
-    //     })
-    // }
 
     private players: SocketPlayer[] = [];
     private engine: Engine;
-    private socket: Socket;
-    private data: string;
+    private rooms: Map<string, Set<Socket>> = new Map();
 
-    @SubscribeMessage('dataClient')
-    dataClient(@MessageBody() data: string,){
-        console.log(data)
+    @SubscribeMessage('createRoom')
+    handleCreateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomName: string): void {
+      const roomId = generateUniqueId(); // Генерация уникального идентификатора комнаты
+      const room = new Set<Socket>();
+      room.add(client);
+      this.rooms.set(roomId, room);
+      client.join(roomId);
+      this.server.to(client.id).emit('roomCreated', roomId);
+      console.log(this.rooms)
     }
-
-    // @SubscribeMessage('data')
-    // handleData(
-    //     @MessageBody() data: string,
-    //     @ConnectedSocket() socket: Socket) {
-    //     socket.emit('data', data);
-    //     this.socket = socket;
-    //     this.data = data;
-    //
-    // }
+  
+    @SubscribeMessage('joinRoom')
+    handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): void {
+      const room = this.rooms.get(roomId);
+      if (room) {
+        room.add(client);
+        client.join(roomId);
+        this.server.to(roomId).emit('userJoined', client.id);
+      } else {
+        this.server.to(client.id).emit('roomNotFound');
+      }
+    }
+    
     @SubscribeMessage('start')
     async start(
         @ConnectedSocket() socket: Socket)
@@ -104,3 +107,42 @@ async function sleep(ms: number): Promise<void> {
         setTimeout(() => resolve(), ms)
     })
 }
+
+function generateUniqueId(): string {
+    const roomId = uuidv4();
+    return roomId;
+  }
+
+//   @SubscribeMessage('start')
+//   async start(
+//       @ConnectedSocket() socket: Socket)
+//    {
+//       if (this.players.length >= EXPECTED_PLAYERS) {
+//           socket.emit('status', { status: PlayerStatus.ERROR, message: 'This game is full' });
+//           socket.disconnect();
+//       } else {
+//           const player = new SocketPlayer(socket);
+//           this.players.push(player);
+//           console.log('Connected new socket')
+//           socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
+//           if (this.players.length === EXPECTED_PLAYERS) {
+
+//               this.startGame();
+//           }
+//       }
+//   }
+
+//   async startGame() {
+//       for (const player of this.players) {
+//           player.socket.emit('status', { status: PlayerStatus.STARTED });
+//       }
+//       this.engine = new Engine(this.players);
+//       const winner = await this.engine.start();
+//       const winnerIndex = this.players.findIndex((player) => player === winner);
+//       for (const player of this.players) {
+//           player.socket.emit('status', { status: PlayerStatus.FINISHED, winnerIndex });
+//           player.socket.disconnect()
+//       }
+
+
+//   }
