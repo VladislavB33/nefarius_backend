@@ -42,30 +42,26 @@ export class GameGateway implements OnGatewayConnection {
 
     private players: SocketPlayer[] = [];
     private engine: Engine;
-    private rooms: Map<string, Set<Socket>> = new Map();
+    
 
     @SubscribeMessage('createRoom')
     handleCreateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomName: string): void {
-      const roomId = generateUniqueId(); // Генерация уникального идентификатора комнаты
-      const room = new Set<Socket>();
-      room.add(client);
-      this.rooms.set(roomId, room);
-      client.join(roomId);
-      this.server.to(client.id).emit('roomCreated', roomId);
-      console.log(this.rooms)
+      client.join(roomName);
+      this.server.to(client.id).emit('roomCreated', roomName);
+      console.log(roomName)
     }
   
-    @SubscribeMessage('joinRoom')
-    handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): void {
-      const room = this.rooms.get(roomId);
-      if (room) {
-        room.add(client);
-        client.join(roomId);
-        this.server.to(roomId).emit('userJoined', client.id);
-      } else {
-        this.server.to(client.id).emit('roomNotFound');
-      }
-    }
+    // @SubscribeMessage('joinRoom')
+    // handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): void {
+    //   const room = this.rooms.get(roomId);
+    //   if (room) {
+    //     room.add(client);
+    //     client.join(roomId);
+    //     this.server.to(roomId).emit('userJoined', client.id);
+    //   } else {
+    //     this.server.to(client.id).emit('roomNotFound');
+    //   }
+    // }
     
     @SubscribeMessage('start')
     async start(

@@ -7,7 +7,8 @@ import { Player } from './player.entity';
 @Injectable()
 export class PlayerService {
   constructor(
-    @InjectRepository(Player) private playersRepository: Repository<Player>,
+    @InjectRepository(Player) 
+    private playersRepository: Repository<Player>,
   ) {}
 
   findAll(): Promise<Player[]> {
@@ -23,7 +24,7 @@ export class PlayerService {
   }
 
   async createPlayer(dto: CreatePlayerDto) {
-    const player = await this.playersRepository.create(dto);
+    const player = await this.playersRepository.save(dto);
     return player;
   }
 }
