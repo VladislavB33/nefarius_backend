@@ -1,35 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateGameDto } from './dto/create-game-dto';
 import { Game } from './game.entity';
+import { Repository } from 'typeorm';
+import { Player } from 'src/player/player.entity';
+import { CreateGameDto } from './dto/create-game-dto';
 
 @Injectable()
 export class GameService {
-  constructor(
-    @InjectRepository(Game)
-    private gameRepository: Repository<Game>,
-  ) {}
+    constructor(
+        @InjectRepository(Game) private gameRepository: Repository<Game>,
+        @InjectRepository(Player) private playerRepository: Repository<Player>) { }
 
-  async findAll(): Promise<Game[]> {
-    return this.gameRepository.find();
-  }
-
-  async createGame(dto: CreateGameDto): Promise<number> {
-    const game = await this.gameRepository.create(dto);
-    return game.id;
-  }
-
-  async findOne(gameId: number): Promise<Game> {
-    return this.gameRepository.findOneBy({ id: gameId });
-  }
-
-  
-
-  
+    async createGame(dto: CreateGameDto, id: number) {
+        try {
+            const player = await this.playerRepository.findOneBy({ id })
+            const player2 = await this.playerRepository.findOneBy({ id: 7 })
 
 
-  async remove(id: string): Promise<void> {
-    await this.gameRepository.delete(id);
-  }
+            const newGame = new Game()
+            newGame.title = dto.title;
+            newGame.password = dto.password
+            newGame.players = [player, player2]
+            return await this.gameRepository.save(newGame)
+
+        } catch (error) {
+            throw new Error
+        }
+    }
 }

@@ -3,7 +3,6 @@ import { Server, Socket } from 'socket.io';
 import { Engine } from 'src/gameengine/engine';
 import { Action, InventionCard, Turn } from 'src/gameengine/types';
 import { SocketPlayer } from './gateway.service';
-import { v4 as uuidv4 } from 'uuid'
 
 const EXPECTED_PLAYERS = 2;
 export enum PlayerStatus {
@@ -33,7 +32,7 @@ export interface SocketMessage {
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection {
-    handleConnection(client: any, ...args: any[]) {
+    handleConnection(client: Socket) {
         console.log('Client connected')
         console.log('Client id', client.id)
 
@@ -42,44 +41,31 @@ export class GameGateway implements OnGatewayConnection {
 
     private players: SocketPlayer[] = [];
     private engine: Engine;
-    
 
-    @SubscribeMessage('createRoom')
-    handleCreateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomName: string): void {
-      client.join(roomName);
-      this.server.to(client.id).emit('roomCreated', roomName);
-      console.log(roomName)
+
+    private games: Record<string, Set<Socket>> = {};
+
+    @SubscribeMessage('joinGame')
+    handleJoinGame(client: Socket, gameName: string) {
+      if (!this.games[gameName]) {
+        this.games[gameName] = new Set();
+      }
+      this.games[gameName].add(client);
     }
-  
-    // @SubscribeMessage('joinRoom')
-    // handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): void {
-    //   const room = this.rooms.get(roomId);
-    //   if (room) {
-    //     room.add(client);
-    //     client.join(roomId);
-    //     this.server.to(roomId).emit('userJoined', client.id);
-    //   } else {
-    //     this.server.to(client.id).emit('roomNotFound');
-    //   }
-    // }
-    
+
     @SubscribeMessage('start')
     async start(
-        @ConnectedSocket() socket: Socket)
-     {
-        if (this.players.length >= EXPECTED_PLAYERS) {
-            socket.emit('status', { status: PlayerStatus.ERROR, message: 'This game is full' });
-            socket.disconnect();
-        } else {
-            const player = new SocketPlayer(socket);
-            this.players.push(player);
-            console.log('Connected new socket')
-            socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
-            if (this.players.length === EXPECTED_PLAYERS) {
+        @ConnectedSocket() socket: Socket) {
 
-                this.startGame();
-            }
+        const player = new SocketPlayer(socket);
+        this.players.push(player);
+        console.log('Connected new socket')
+        socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
+        if (this.players.length === EXPECTED_PLAYERS) {
+
+            this.startGame();
         }
+
     }
 
     async startGame() {
@@ -104,10 +90,6 @@ async function sleep(ms: number): Promise<void> {
     })
 }
 
-function generateUniqueId(): string {
-    const roomId = uuidv4();
-    return roomId;
-  }
 
 //   @SubscribeMessage('start')
 //   async start(

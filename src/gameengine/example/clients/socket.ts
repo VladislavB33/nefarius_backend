@@ -11,7 +11,7 @@ const socket = io(`http://${HOST}:${PORT}`)
 
 
 socket.on('connect', () => {
-  socket.emit('start')
+  socket.emit('joinGame', 'gameName')
   console.log('connected')
   })
 

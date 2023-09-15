@@ -1,30 +1,20 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game-dto';
-import { Game } from './game.entity';
 import { GameService } from './game.service';
+import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { GameGateway } from 'src/gateway/gamegateway.gateway';
 
-@Controller('games')
+@Controller('game')
 export class GameController {
-  constructor(private readonly gameService: GameService) {}
-
-  @Get()
-  async findAll(@Query('status') status): Promise<Game[]> {
-    return this.gameService.findAll()
-  }
-
-  @Get(':id')
-  async findById(): Promise<void> {
-
-  }
-
-  @Post()
-  async createGame(@Body() gameDto: CreateGameDto): Promise<void> {
-    await this.gameService.createGame(gameDto)
-  }
-
-  @Post('join')
-  joinGame(): Promise<string> {
-    return Promise.resolve('testToken')
-  }
-
+    constructor(
+        private gameService: GameService,
+        private gameGateway: GameGateway) { }
+    @Post()
+    @UseGuards(JwtAuthGuard)
+    async createGame(@Body() dto: CreateGameDto, @Req() req) {
+        const game = await this.gameService.createGame(dto, +req.user.id)
+        this.gameGateway.server.emit('newGameCreated', game)
+        console.log(game)
+        return game
+    }
 }

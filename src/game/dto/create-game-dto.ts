@@ -1,4 +1,4 @@
 export class CreateGameDto {
-   readonly name: string;
+   readonly title: string;
    readonly password?: string;
 }
