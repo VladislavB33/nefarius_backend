@@ -44,4 +44,18 @@ export class AuthService {
             }
             return player
     }
+
+    async generateToken(userId, roomId) {
+        return { token: this.jwtService.sign({ userId, roomId }) }
+    }
+
+    async validateToken(token) {
+        return this.jwtService.verify(token)
+    }
+
+    async decodeToken(token) {
+        return this.jwtService.decode(token)
+    }
+
+
 }
