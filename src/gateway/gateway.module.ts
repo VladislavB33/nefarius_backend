@@ -1,15 +1,12 @@
 import { Module } from '@nestjs/common';
-import { GameGateway } from './gamegateway.gateway';
 import { AuthModule } from 'src/auth/auth.module';
-import { GatewayService } from './gateway.service';
-
-
+import { GameGateway } from './gamegateway.gateway';
 
 @Module({
-  controllers: [],
-  providers: [GameGateway],
-  exports: [GameGateway],
-  imports: [AuthModule]
+    controllers: [],
+    providers: [GameGateway],
+    exports: [GameGateway],
+    imports: [AuthModule],
 
 })
 export class GatewayModule {}

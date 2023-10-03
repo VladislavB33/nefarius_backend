@@ -1,8 +1,6 @@
-export type TokenData  = {
+export interface ITokenData {
     userId: string;
     roomId: string;
     iat: number;
     exp: number;
-  };
-
-export type qwer = {[key: string]: any;}
+}

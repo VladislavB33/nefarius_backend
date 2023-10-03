@@ -1,67 +1,23 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { TokenData } from './gateway.types';
-
-
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection {
     constructor(private authService: AuthService) {}
 
-    async handleConnection(socket: Socket ) {
-    const token = socket.handshake.query.token
+    async handleConnection(socket: Socket) {
+        const { token } = socket.handshake.query;
 
-    await this.authService.validateToken(token)
-    const data = this.authService.decodeToken(token)
-    socket.join(data.roomId)
-    
+        await this.authService.validateToken(token);
+        const data = await this.authService.decodeToken(token);
+        // eslint-disable-next-line no-void
+        void socket.join(data.roomId);
     }
 
     @WebSocketServer() server: Server;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //     @SubscribeMessage('joinGame')
 //     handleJoinGame(client: Socket, gameName: string) {
@@ -98,7 +54,6 @@ export class GameGateway implements OnGatewayConnection {
 //             player.socket.disconnect()
 //         }
 
-
 //     }
 // }
 
@@ -107,7 +62,6 @@ export class GameGateway implements OnGatewayConnection {
 //         setTimeout(() => resolve(), ms)
 //     })
 // }
-
 
 //   @SubscribeMessage('start')
 //   async start(
@@ -139,4 +93,3 @@ export class GameGateway implements OnGatewayConnection {
 //           player.socket.emit('status', { status: PlayerStatus.FINISHED, winnerIndex });
 //           player.socket.disconnect()
 //       }
-

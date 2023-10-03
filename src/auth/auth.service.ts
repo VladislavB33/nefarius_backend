@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from 'src/player/player.entity';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
-import { TokenData } from 'src/gateway/gateway.types';
+import { ITokenData } from 'src/gateway/gateway.types';
 
 export interface IPlayer {
     id: string,
@@ -14,15 +14,17 @@ export interface IPlayer {
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectRepository(Player) private playerRepository: Repository<Player>,
+    constructor(
+        @InjectRepository(Player) private playerRepository: Repository<Player>,
         private jwtService: JwtService,
-        private readonly configService: ConfigService) { }
+        private readonly configService: ConfigService,
+    ) { }
 
     async login(player: IPlayer) {
-        const { id, email } = player
+        const { id, email } = player;
         return {
-            id, email, token: this.jwtService.sign({ id: player.id, email: player.email })
-        }
+            id, email, token: this.jwtService.sign({ id: player.id, email: player.email }),
+        };
     }
 
     async validatePlayer(email: string, password: string) {
@@ -30,38 +32,36 @@ export class AuthService {
         hmac.update(password);
         const hashedPassword = hmac.digest('hex');
 
-        const player = await this.getPlayerByEmail(email)
+        const player = await this.getPlayerByEmail(email);
 
         if (player && hashedPassword === player.password) {
-            return player
+            return player;
         }
-        throw new UnauthorizedException({ message: 'Incorrect email or password' })
+        throw new UnauthorizedException({ message: 'Incorrect email or password' });
     }
 
     async getPlayerByEmail(email: string) {
-            const player = await this.playerRepository.findOneBy({ email })
-            if (!player) {
-                throw new NotFoundException('User with this email does not exist')
-            }
-            return player
+        const player = await this.playerRepository.findOneBy({ email });
+        if (!player) {
+            throw new NotFoundException('User with this email does not exist');
+        }
+        return player;
     }
 
     async generateToken(userId, roomId) {
-        return { token: this.jwtService.sign({ userId, roomId }) }
+        return { token: this.jwtService.sign({ userId, roomId }) };
     }
 
     async validateToken(token) {
-        return this.jwtService.verify(token)
+        return this.jwtService.verify(token);
     }
 
-    async decodeToken(token) {
+    async decodeToken(token): Promise<ITokenData> {
         try {
-          const decodedToken = this.jwtService.decode(token);
-          return decodedToken;
+            return this.jwtService.decode(token) as ITokenData;
         } catch (error) {
-          console.error('Ошибка при декодировании токена:', error);
-          return null;
+            console.error('Ошибка при декодировании токена:', error);
+            return null;
         }
-      }
-
+    }
 }

@@ -36,6 +36,8 @@
     "@nestjs/websockets": "^9.4.0",
     "@types/lodash": "^4.14.194",
     "cross-env": "^7.0.3",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
     "lodash": "^4.17.21",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",

@@ -1,25 +1,26 @@
 import { Player } from 'src/player/player.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import {
+    Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable,
+} from 'typeorm';
 
 @Entity()
 export class Game {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+        id: number;
 
-  @Column({ unique: false, nullable: false})
-  title: string;
+    @Column({ unique: false, nullable: false })
+        title: string;
 
-  @Column({ nullable: true})
-  password: string;
+    @Column({ nullable: true })
+        password: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+    @CreateDateColumn()
+        createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @UpdateDateColumn()
+        updatedAt: Date;
 
-  @ManyToMany(() => Player)
-  @JoinTable()
-  players: Player[]
-
+    @ManyToMany(() => Player)
+    @JoinTable()
+        players: Player[];
 }
