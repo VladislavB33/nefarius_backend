@@ -19,6 +19,13 @@ export class GameController {
         console.log(game)
         return game
     }
+    // Удалить после тестов
+    @Get('token/:token')
+    async decodeToken (@Param('token') token: string) {
+        const Itoken = await this.authService.decodeToken(token)
+        console.log(Itoken)
+        return(Itoken)
+    }
 
     @Patch(':roomId/join')
     @UseGuards(JwtAuthGuard)

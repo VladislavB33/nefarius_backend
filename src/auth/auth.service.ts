@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from 'src/player/player.entity';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
+import { TokenData } from 'src/gateway/gateway.types';
 
 export interface IPlayer {
     id: string,
@@ -54,8 +55,13 @@ export class AuthService {
     }
 
     async decodeToken(token) {
-        return this.jwtService.decode(token)
-    }
-
+        try {
+          const decodedToken = this.jwtService.decode(token);
+          return decodedToken;
+        } catch (error) {
+          console.error('Ошибка при декодировании токена:', error);
+          return null;
+        }
+      }
 
 }
