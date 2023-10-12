@@ -7,6 +7,7 @@ import {
 
 export class SocketPlayer implements User {
     socket: Socket;
+    roomId: string
 
     data: string;
 
@@ -14,11 +15,17 @@ export class SocketPlayer implements User {
 
     pendingCommand: Method | null = null;
 
-    constructor(socket: Socket) {
+    constructor(socket: Socket, roomId: string) {
         this.socket = socket;
+        this.roomId = roomId
         // eslint-disable-next-line no-underscore-dangle
-        this.socket.on('data', (data) => this._socketDataHandler(data));
+        this.socket.on('data', (roomName, data) => {
+            if (roomName === roomId) {
+                this._socketDataHandler(data)
+            }
+        }        )
     }
+
 
     // eslint-disable-next-line no-underscore-dangle
     _socketDataHandler(bufer: string): void {
@@ -38,7 +45,7 @@ export class SocketPlayer implements User {
     }
 
     async waitForAnswer(method: Method): Promise<SocketMessage> {
-    // Wait for another operation to complete
+        // Wait for another operation to complete
         while (this.waitingFunction !== null) {
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             await sleep(1000);
@@ -54,12 +61,12 @@ export class SocketPlayer implements User {
     }
 
     async giveCards(cards: InventionCard[]): Promise<void> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
         await this.waitForAnswer(Method.GIVE_CARDS);
     }
 
     async returnSpy(): Promise<Action> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.RETURN_SPY);
@@ -68,7 +75,7 @@ export class SocketPlayer implements User {
     }
 
     async placeSpy(): Promise<Action> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.SEND_SPY);
@@ -77,12 +84,12 @@ export class SocketPlayer implements User {
     }
 
     async setCoins(money: number): Promise<void> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
         await this.waitForAnswer(Method.SET_MONEY);
     }
 
     async takeOffCards(count: number): Promise<string[]> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.TAKE_OFF_CARDS);
@@ -91,7 +98,7 @@ export class SocketPlayer implements User {
     }
 
     async turn(): Promise<Turn> {
-        await this.socket.emit('data', (`${JSON.stringify({ method: Method.TURN })}\r`));
+        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.TURN })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.TURN);

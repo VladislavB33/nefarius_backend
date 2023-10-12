@@ -1,95 +1,53 @@
-import { WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import { InjectRepository } from '@nestjs/typeorm';
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection, SubscribeMessage, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
+import { Game } from 'src/game/game.entity';
+import { Player } from 'src/player/player.entity';
+import { Repository } from 'typeorm';
+import { RoomGateway } from './roomgateway';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection {
-    constructor(private authService: AuthService) {}
+    private rooms: { [roomId: string]: RoomGateway } = {}
+
+    constructor(private authService: AuthService,
+        @InjectRepository(Game) private gameRepository: Repository<Game>,
+        @InjectRepository(Player) private playerRepository: Repository<Player>,) { }
 
     async handleConnection(socket: Socket) {
         const { token } = socket.handshake.query;
+        console.log('токен:', socket.handshake.query)
 
-        await this.authService.validateToken(token);
-        const data = await this.authService.decodeToken(token);
+        // вроде и не надо
+        // await this.authService.validateToken(token);
+        // console.log('Валидированный токен:', await this.authService.validateToken(token))
+        const decodeToken = await this.authService.decodeToken(token);
+        
+        console.log('декодированный токен:', decodeToken)
+        //проверять количество участников
+        //проверять пользователя в комнате???
+        const game = await this.gameRepository.findOne({
+            relations: ['players'],
+            where: {
+                id: +decodeToken.roomId,
+            },
+        })
+        console.log('game:', game)
+        console.log('game:', game.players.length)
         // eslint-disable-next-line no-void
-        void socket.join(data.roomId);
+        
+        // выкинуть пользователей если комната не собралась
+        await socket.join(decodeToken.roomId)
+        if (!this.rooms[decodeToken.roomId]) {
+            this.rooms[decodeToken.roomId] = new RoomGateway(decodeToken.roomId, game.players.length);
+        }
+
+        this.rooms[decodeToken.roomId].clientConnected(socket);
+        console.log('this.rooms:', this.rooms)
+        await this.server.to(decodeToken.roomId).emit('connected', `user ${decodeToken.userId} connected to room ${decodeToken.roomId}`)
+
     }
 
     @WebSocketServer() server: Server;
 }
-
-//     @SubscribeMessage('joinGame')
-//     handleJoinGame(client: Socket, gameName: string) {
-//       if (!this.games[gameName]) {
-//         this.games[gameName] = new Set();
-//       }
-//       this.games[gameName].add(client);
-//     }
-
-//     @SubscribeMessage('start')
-//     async start(
-//         @ConnectedSocket() socket: Socket) {
-
-//         const player = new SocketPlayer(socket);
-//         this.players.push(player);
-//         console.log('Connected new socket')
-//         socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
-//         if (this.players.length === EXPECTED_PLAYERS) {
-
-//             this.startGame();
-//         }
-
-//     }
-
-//     async startGame() {
-//         for (const player of this.players) {
-//             player.socket.emit('status', { status: PlayerStatus.STARTED });
-//         }
-//         engine = new Engine(this.players);
-//         const winner = await this.engine.start();
-//         const winnerIndex = this.players.findIndex((player) => player === winner);
-//         for (const player of this.players) {
-//             player.socket.emit('status', { status: PlayerStatus.FINISHED, winnerIndex });
-//             player.socket.disconnect()
-//         }
-
-//     }
-// }
-
-// async function sleep(ms: number): Promise<void> {
-//     return await new Promise((resolve) => {
-//         setTimeout(() => resolve(), ms)
-//     })
-// }
-
-//   @SubscribeMessage('start')
-//   async start(
-//       @ConnectedSocket() socket: Socket)
-//    {
-//       if (this.players.length >= EXPECTED_PLAYERS) {
-//           socket.emit('status', { status: PlayerStatus.ERROR, message: 'This game is full' });
-//           socket.disconnect();
-//       } else {
-//           const player = new SocketPlayer(socket);
-//           this.players.push(player);
-//           console.log('Connected new socket')
-//           socket.emit('status', { status: PlayerStatus.REGISTERED, index: this.players.length - 1 });
-//           if (this.players.length === EXPECTED_PLAYERS) {
-
-//               this.startGame();
-//           }
-//       }
-//   }
-
-//   async startGame() {
-//       for (const player of this.players) {
-//           player.socket.emit('status', { status: PlayerStatus.STARTED });
-//       }
-//       this.engine = new Engine(this.players);
-//       const winner = await this.engine.start();
-//       const winnerIndex = this.players.findIndex((player) => player === winner);
-//       for (const player of this.players) {
-//           player.socket.emit('status', { status: PlayerStatus.FINISHED, winnerIndex });
-//           player.socket.disconnect()
-//       }

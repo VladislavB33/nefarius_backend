@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Player } from 'src/player/player.entity';
@@ -36,8 +36,12 @@ export class GameService {
             where: { id: playerId },
         });
 
+        if(game.players.includes(player)) {
+            throw new HttpException('The player is already in the room', HttpStatus.BAD_REQUEST);
+        }
         game.players.push(player);
         return this.gameRepository.save(game);
+        
     }
 
     async leaveGame(roomId, playerId) {

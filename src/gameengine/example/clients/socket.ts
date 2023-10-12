@@ -3,15 +3,33 @@ import { ConsoleClient } from './console';
 import { Method, SocketMessage } from '../socket-server-game';
 
 const HOST = 'localhost';
-const PORT = 7000;
+const PORT = 6000;
+const roomId = '16'
 
 const consoleClient = new ConsoleClient();
+// подключение с токеном
+//npm run addPlayer token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb29tSWQiOiIxNiIsInVzZXJJZCI6OCwiaWF0IjoxNjk2OTU0NDE2LCJleHAiOjE2OTcwNDA4MTZ9.l_nBXF5O_cn-lPp6LjkopQSajhIm5yfeKO_ifkM8tcU"
+//npm run addPlayer token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb29tSWQiOiIxNiIsInVzZXJJZCI6OSwiaWF0IjoxNjk2OTU0NDQ4LCJleHAiOjE2OTcwNDA4NDh9.Ab7G8ly5xbERafTTvgtdRcnR6dU-1NKGBFulUlkOnJI"
 
-const socket = io(`http://${HOST}:${PORT}`);
+
+
+
+let token = process.argv[2].replace('token=', '')
+
+
+
+const socket = io(`http://${HOST}:${PORT}`, {
+    query: {
+        token: `${token}`
+    }
+});
 
 socket.on('connect', () => {
-    socket.emit('joinGame', 'gameName');
     console.log('connected');
+});
+
+socket.on('status', () => {
+    console.log('status');
 });
 
 socket.on('error', (err) => {
@@ -44,27 +62,27 @@ async function messageHandler(message: SocketMessage): Promise<void> {
     switch (message.method) {
         case Method.GIVE_CARDS:
             await consoleClient.giveCards(message.cards ?? []);
-            await socket.emit('data', (`${JSON.stringify({ method: Method.GIVE_CARDS })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.GIVE_CARDS })}\r`));
             break;
         case Method.SET_MONEY:
             await consoleClient.setCoins(message.count ?? 0);
-            await socket.emit('data', (`${JSON.stringify({ method: Method.SET_MONEY })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.SET_MONEY })}\r`));
             break;
         case Method.RETURN_SPY:
             answer = await consoleClient.returnSpy();
-            await socket.emit('data', (`${JSON.stringify({ method: Method.RETURN_SPY, action: answer })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.RETURN_SPY, action: answer })}\r`));
             break;
         case Method.SEND_SPY:
             answer = await consoleClient.placeSpy();
-            await socket.emit('data', (`${JSON.stringify({ method: Method.SEND_SPY, action: answer })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.SEND_SPY, action: answer })}\r`));
             break;
         case Method.TAKE_OFF_CARDS:
             answer = await consoleClient.takeOffCards(message.count ?? 0);
-            await socket.emit('data', (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, cardIds: answer })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, cardIds: answer })}\r`));
             break;
         case Method.TURN:
             answer = await consoleClient.turn();
-            await socket.emit('data', (`${JSON.stringify({ method: Method.TURN, turn: answer })}\r`));
+            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.TURN, turn: answer })}\r`));
             break;
     }
 }

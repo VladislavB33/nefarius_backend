@@ -15,13 +15,16 @@ export class GameController {
         private authService: AuthService,
     ) { }
 
+
     @Post()
     @UseGuards(JwtAuthGuard)
     async createGame(@Body() dto: CreateGameDto, @Req() req) {
         const game = await this.gameService.createGame(dto, +req.user.id);
+        const token = await this.authService.generateToken(`${game.id}`, +req.user.id)
         this.gameGateway.server.emit('newGameCreated', game);
+        
         console.log(game);
-        return game;
+        return { game, token};
     }
 
     // Удалить после тестов
@@ -31,13 +34,13 @@ export class GameController {
         console.log(Itoken);
         return (Itoken);
     }
-
+    // проверять количество участников
     @Patch(':roomId/join')
     @UseGuards(JwtAuthGuard)
     async joinGame(@Param('roomId') roomId: string, @Req() req) {
         try {
             const game = await this.gameService.joinGame(roomId, +req.user.id);
-            const token = await this.authService.generateToken(roomId, +req.user.id);
+            const token = await this.authService.generateToken(`${game.id}`, +req.user.id);
             await this.gameGateway.server.emit('playerJoned', { roomId, playerId: +req.user.id });
             return { game, token };
         } catch (e) {

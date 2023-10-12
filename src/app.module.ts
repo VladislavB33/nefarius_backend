@@ -5,7 +5,6 @@ import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { AuthModule } from './auth/auth.module';
-import { GameGateway } from './gateway/gamegateway.gateway';
 
 @Module({
     imports: [

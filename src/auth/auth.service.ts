@@ -48,12 +48,12 @@ export class AuthService {
         return player;
     }
 
-    async generateToken(userId, roomId) {
-        return { token: this.jwtService.sign({ userId, roomId }) };
+    async generateToken(roomId, userId) {
+        return { token: this.jwtService.sign({ roomId, userId }) };
     }
 
     async validateToken(token) {
-        return this.jwtService.verify(token);
+        return this.jwtService.verify(token) as ITokenData;
     }
 
     async decodeToken(token): Promise<ITokenData> {

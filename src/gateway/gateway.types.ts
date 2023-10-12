@@ -1,6 +1,6 @@
 export interface ITokenData {
-    userId: string;
     roomId: string;
+    userId: number;
     iat: number;
     exp: number;
 }

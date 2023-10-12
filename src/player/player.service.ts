@@ -24,7 +24,7 @@ export class PlayerService {
         });
 
         if (existPlayer) {
-            throw new HttpException('User with this email exists', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Player with this email exists', HttpStatus.BAD_REQUEST);
         }
         const hmac = crypto.createHmac('sha256', this.configService.get('HASH_SECRET'));
         hmac.update(dto.password);
@@ -68,8 +68,8 @@ export class PlayerService {
 
     async deleteUser(id: number) {
         const player = await this.playersRepository.findOneBy({ id });
-        if (!player) { throw new NotFoundException('User not found'); }
+        if (!player) { throw new NotFoundException('Player not found'); }
         await this.playersRepository.delete(player);
-        throw new HttpException('User deleted', HttpStatus.OK);
+        throw new HttpException('Player deleted', HttpStatus.OK);
     }
 }
