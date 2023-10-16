@@ -3,7 +3,8 @@ import { Socket } from 'socket.io';
 import { Method, SocketMessage } from 'src/gameengine/example/socket-server-game';
 import {
     Action, InventionCard, Turn, User,
-} from 'src/gameengine/types';
+} from 'nefarius';
+import { PlayerStats } from '../gameengine/types'
 
 export class SocketPlayer implements User {
     socket: Socket;
@@ -104,6 +105,14 @@ export class SocketPlayer implements User {
             answer = await this.waitForAnswer(Method.TURN);
         } while (answer.turn === undefined);
         return answer.turn;
+    }
+
+    cancelPlaceSpy (action: Action): Promise<void> {
+        return Promise.resolve(undefined);
+    }
+
+    statistics (statistics: PlayerStats): Promise<void> {
+        return Promise.resolve(undefined);
     }
 }
 

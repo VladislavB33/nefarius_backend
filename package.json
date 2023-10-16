@@ -39,6 +39,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "lodash": "^4.17.21",
+    "nefarius": "github:dima11051994/nefarius#export-experiments",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",

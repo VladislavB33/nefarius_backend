@@ -1,17 +1,17 @@
 import { Socket } from 'socket.io'
 import { SocketPlayer } from "./soketPlayer"
 import { PlayerStatus } from 'src/gameengine/example/socket-server-game'
-import { Engine } from 'src/gameengine/engine'
+import { Engine } from 'nefarius'
 
 export class RoomGateway {
     private players: SocketPlayer[] = []
-    roomId: string | undefined 
+    roomId: string | undefined
     expectedPlayers: number | undefined
 
     constructor(roomId: string,
         expectedPlayers: number) {
-            this.roomId = roomId; 
-            this.expectedPlayers = expectedPlayers; 
+            this.roomId = roomId;
+            this.expectedPlayers = expectedPlayers;
     }
 
     clientConnected(socket: Socket) {

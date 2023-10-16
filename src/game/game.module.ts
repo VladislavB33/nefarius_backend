@@ -13,7 +13,7 @@ import { GameController } from './game.controller';
 
 @Module({
     controllers: [GameController],
-    providers: [GameService, GameGateway, AuthService],
+    providers: [GameService, AuthService],
     imports: [
         TypeOrmModule.forFeature([Game, Player]),
         JwtModule.registerAsync({

@@ -1,10 +1,10 @@
 import { io } from 'socket.io-client';
-import { ConsoleClient } from './console';
+import { ConsoleClient } from 'nefarius';
 import { Method, SocketMessage } from '../socket-server-game';
 
 const HOST = 'localhost';
-const PORT = 6000;
-const roomId = '16'
+const PORT = 5000;
+const roomId = '2'
 
 const consoleClient = new ConsoleClient();
 // подключение с токеном
@@ -53,7 +53,6 @@ async function socketDataHandler(data:any): Promise<void> {
     for (const messageStr of messages) {
         const message: SocketMessage = JSON.parse(messageStr);
         await messageHandler(message);
-        console.log(await messageHandler(message));
     }
 }
 
