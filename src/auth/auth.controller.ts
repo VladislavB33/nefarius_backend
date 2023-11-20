@@ -4,7 +4,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
-import { JwtAuthGuard } from './jwt.auth.guard';
+import { BasicAuthGuard } from './basic-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -18,7 +18,7 @@ export class AuthController {
     }
 
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Get('profile')
     async getProfile(@Request() req) {
         return req.user;

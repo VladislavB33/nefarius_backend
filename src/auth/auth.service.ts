@@ -14,6 +14,9 @@ export interface IPlayer {
 
 @Injectable()
 export class AuthService {
+    validateUser(username: string, password: string) {
+      throw new Error('Method not implemented.');
+    }
     constructor(
         @InjectRepository(Player) private playerRepository: Repository<Player>,
         private jwtService: JwtService,

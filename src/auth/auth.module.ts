@@ -8,6 +8,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
+import { BasicAuthStrategy } from './basic.strategy';
+
+
 
 @Module({
     imports: [
@@ -21,7 +24,7 @@ import { LocalStrategy } from './local.strategy';
             }),
             inject: [ConfigService],
         })],
-    providers: [AuthService, JwtStrategy, LocalStrategy],
+    providers: [AuthService, JwtStrategy, LocalStrategy, BasicAuthStrategy],
     controllers: [AuthController],
     exports: [AuthService],
 })
