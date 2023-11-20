@@ -34,7 +34,7 @@ export class PlayerService {
                 email: dto.email,
                 password: hashedPassword,
             });
-            return player;
+            return { id: player.id, email: player.email };
         } catch (e) {
             throw new Error(e);
         }
@@ -42,7 +42,9 @@ export class PlayerService {
 
     async getAllPlayerByEmail() {
         try {
-            return await this.playersRepository.find();
+            return await this.playersRepository.find({
+                select: ["id", "email"]
+            });
         } catch (error) {
             throw new Error(error);
         }
@@ -60,7 +62,7 @@ export class PlayerService {
             player.password = hashedPassword;
 
             const updatedPlayer = await this.playersRepository.save(player);
-            return updatedPlayer;
+            return { id: updatedPlayer.id, email: updatedPlayer.email }
         } catch (error) {
             throw new Error(error);
         }

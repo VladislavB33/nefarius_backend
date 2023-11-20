@@ -38,7 +38,7 @@ export class AuthService {
         const player = await this.getPlayerByEmail(email);
 
         if (player && hashedPassword === player.password) {
-            return player;
+            return { id: player.id, email: player.email };;
         }
         throw new UnauthorizedException({ message: 'Incorrect email or password' });
     }

@@ -24,7 +24,6 @@ import { GameController } from './game.controller';
             }),
             inject: [ConfigService],
         }),
-        GatewayModule,
         AuthModule,
     ],
 })

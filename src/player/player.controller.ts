@@ -1,10 +1,11 @@
 import {
     Body, Controller, Delete, Get, Post, Put, Req, UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger/dist';
+import { ApiBasicAuth, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger/dist';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { PlayerService } from './player.service';
+import { BasicAuthGuard } from 'src/auth/basic-auth.guard';
 
 @Controller('players')
 export class PlayerController {
@@ -17,24 +18,24 @@ export class PlayerController {
     }
 
     @ApiOperation({ summary: 'Get all players' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @ApiBasicAuth()
+    @UseGuards(BasicAuthGuard)
     @Get()
     findAllPlayersByEmail() {
         return this.playerService.getAllPlayerByEmail();
     }
 
     @ApiOperation({ summary: 'Update player' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @ApiBasicAuth()
+    @UseGuards(BasicAuthGuard)
     @Put()
     updatePlayer(@Body() playerDto: CreatePlayerDto, @Req() req) {
         return this.playerService.updatePlayer(playerDto, +req.player.id);
     }
 
     @ApiOperation({ summary: 'Delete player' })
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @ApiBasicAuth()
+    @UseGuards(BasicAuthGuard)
     @Delete()
     deleteUser(@Req() req) {
         return this.playerService.deleteUser(+req.player.id);

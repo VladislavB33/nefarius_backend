@@ -19,29 +19,34 @@ export class GameService {
             newGame.title = dto.title;
             newGame.password = dto.password;
             newGame.players = [player];
-            return await this.gameRepository.save(newGame);
+            const savedGame = await this.gameRepository.save(newGame);
+            return this.gameResponse(savedGame)
         } catch (error) {
             throw new Error();
         }
     }
 
-    async joinGame(roomId, playerId) {
+    async joinGame(roomId: number, playerId: number) {
         const game = await this.gameRepository.findOne({
             relations: ['players'],
             where: {
                 id: roomId,
             },
         });
+        console.log('game = ', game)
         const player = await this.playerRepository.findOne({
             where: { id: playerId },
         });
+        console.log('player = ', player)
 
-        if(game.players.includes(player)) {
+        if (game.players.find(player => player.id === playerId)) {
             throw new HttpException('The player is already in the room', HttpStatus.BAD_REQUEST);
         }
+
         game.players.push(player);
-        return this.gameRepository.save(game);
-        
+        const savedGame = await this.gameRepository.save(game);
+
+        return this.gameResponse(savedGame);
     }
 
     async leaveGame(roomId, playerId) {
@@ -60,7 +65,8 @@ export class GameService {
             throw new NotFoundException('Game not found in game');
         }
         game.players.splice(playerIndex, 1);
-        return this.gameRepository.save(game);
+        const savedGame = await this.gameRepository.save(game);
+        return this.gameResponse(savedGame);
     }
 
     async findAllGame() {
@@ -75,15 +81,32 @@ export class GameService {
 
     async findOneGame(gameId) {
         try {
-            const game = this.gameRepository.findOne({
+            const game = await this.gameRepository.findOne({
                 relations: ['players'],
                 where: {
                     id: gameId,
                 },
             });
-            return await game;
+            return this.gameResponse(game);
         } catch {
             throw new Error();
         }
+    }
+
+    async gameResponse(game) {
+        const { id: gameId, title, players } = game;
+
+        const selectedPlayers = players.map((player) => {
+            const { id: playerId, email } = player;
+            return { id: playerId, email };
+        });
+
+        const gameResponse = {
+            id: gameId,
+            title,
+            players: selectedPlayers,
+        };
+
+        return gameResponse;
     }
 }
