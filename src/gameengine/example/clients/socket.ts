@@ -3,8 +3,8 @@ import { ConsoleClient } from 'nefarius';
 import { Method, SocketMessage } from '../socket-server-game';
 
 const HOST = 'localhost';
-const PORT = 5000;
-const roomId = '2'
+const PORT = 8000;
+const roomId = '21'
 
 const consoleClient = new ConsoleClient();
 // подключение с токеном
@@ -15,6 +15,8 @@ const consoleClient = new ConsoleClient();
 
 
 let token = process.argv[2].replace('token=', '')
+let playerId = process.argv[3].replace('playerId=', '')
+
 
 
 
@@ -47,7 +49,7 @@ socket.on('data', async (data) => {
 
 async function socketDataHandler(data:any): Promise<void> {
     console.log(`Received chunk: ${data}`);
-
+    console.log('playerId=', playerId)
     const messages = data.split('\r');
     data = messages.pop() ?? '';
     for (const messageStr of messages) {
@@ -61,7 +63,7 @@ async function messageHandler(message: SocketMessage): Promise<void> {
     switch (message.method) {
         case Method.GIVE_CARDS:
             await consoleClient.giveCards(message.cards ?? []);
-            await socket.emit('data', roomId, (`${JSON.stringify({ method: Method.GIVE_CARDS })}\r`));
+            await socket.emit('data',  roomId, (`${JSON.stringify({ method: Method.GIVE_CARDS })}\r`));
             break;
         case Method.SET_MONEY:
             await consoleClient.setCoins(message.count ?? 0);

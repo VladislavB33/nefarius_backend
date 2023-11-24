@@ -9,6 +9,7 @@ import { PlayerStats } from '../gameengine/types'
 export class SocketPlayer implements User {
     socket: Socket;
     roomId: string
+    playerId
 
     data: string;
 
@@ -16,9 +17,10 @@ export class SocketPlayer implements User {
 
     pendingCommand: Method | null = null;
 
-    constructor(socket: Socket, roomId: string) {
+    constructor(socket: Socket, roomId: string, playerId) {
         this.socket = socket;
         this.roomId = roomId
+        this.playerId = playerId
         // eslint-disable-next-line no-underscore-dangle
         this.socket.on('data', (roomName, data) => {
             if (roomName === roomId) {

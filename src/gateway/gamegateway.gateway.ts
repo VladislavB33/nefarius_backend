@@ -17,11 +17,7 @@ export class GameGateway implements OnGatewayConnection {
 
     async handleConnection(socket: Socket) {
         const { token } = socket.handshake.query;
-        console.log('токен:', socket.handshake.query)
 
-        // вроде и не надо
-        // await this.authService.validateToken(token);
-        // console.log('Валидированный токен:', await this.authService.validateToken(token))
         const decodeToken = await this.authService.decodeToken(token);
         
         console.log('декодированный токен:', decodeToken)
@@ -33,18 +29,15 @@ export class GameGateway implements OnGatewayConnection {
                 id: +decodeToken.roomId,
             },
         })
-        console.log('game:', game)
-        console.log('game:', game.players.length)
-        // eslint-disable-next-line no-void
-        
         // выкинуть пользователей если комната не собралась
         await socket.join(decodeToken.roomId)
         if (!this.rooms[decodeToken.roomId]) {
             this.rooms[decodeToken.roomId] = new RoomGateway(decodeToken.roomId, game.players.length);
         }
+        const playerId = decodeToken.userId
 
-        this.rooms[decodeToken.roomId].clientConnected(socket);
-        console.log('this.rooms:', this.rooms)
+        this.rooms[decodeToken.roomId].clientConnected(socket, playerId);
+        // console.log('this.rooms:', this.rooms)
         await this.server.to(decodeToken.roomId).emit('connected', `user ${decodeToken.userId} connected to room ${decodeToken.roomId}`)
 
     }
