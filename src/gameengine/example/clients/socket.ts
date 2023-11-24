@@ -42,9 +42,11 @@ socket.on('disconnect', () => {
     console.error('disconnected');
 });
 
-socket.on('data', async (data) => {
+socket.on('data', async (id, data) => {
+    if(playerId == id) {
     await socketDataHandler(data);
-    console.log(data);
+    console.log(data);}
+    console.log('КОСЯК')
 });
 
 async function socketDataHandler(data:any): Promise<void> {

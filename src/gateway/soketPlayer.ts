@@ -64,12 +64,12 @@ export class SocketPlayer implements User {
     }
 
     async giveCards(cards: InventionCard[]): Promise<void> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
         await this.waitForAnswer(Method.GIVE_CARDS);
     }
 
     async returnSpy(): Promise<Action> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.RETURN_SPY);
@@ -78,7 +78,7 @@ export class SocketPlayer implements User {
     }
 
     async placeSpy(): Promise<Action> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.SEND_SPY);
@@ -87,12 +87,12 @@ export class SocketPlayer implements User {
     }
 
     async setCoins(money: number): Promise<void> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
         await this.waitForAnswer(Method.SET_MONEY);
     }
 
     async takeOffCards(count: number): Promise<string[]> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.TAKE_OFF_CARDS);
@@ -101,7 +101,7 @@ export class SocketPlayer implements User {
     }
 
     async turn(): Promise<Turn> {
-        await this.socket.to(this.roomId).emit('data', (`${JSON.stringify({ method: Method.TURN })}\r`));
+        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.TURN })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.TURN);
