@@ -4,19 +4,12 @@ import { Method, SocketMessage } from '../socket-server-game';
 
 const HOST = 'localhost';
 const PORT = 8000;
-const roomId = '21'
+const roomId = '22'
+const playerId = '9'
+const token =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb29tSWQiOiIyMiIsInVzZXJJZCI6OSwiaWF0IjoxNzAxMTA1MTgxLCJleHAiOjE3MDExOTE1ODF9.jnGZnoQp0HB1GuC9AwZE3G3JncO2R7Ih3u-p8mi_2Zg"
+
 
 const consoleClient = new ConsoleClient();
-// подключение с токеном
-//npm run addPlayer token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb29tSWQiOiIxNiIsInVzZXJJZCI6OCwiaWF0IjoxNjk2OTU0NDE2LCJleHAiOjE2OTcwNDA4MTZ9.l_nBXF5O_cn-lPp6LjkopQSajhIm5yfeKO_ifkM8tcU"
-//npm run addPlayer token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb29tSWQiOiIxNiIsInVzZXJJZCI6OSwiaWF0IjoxNjk2OTU0NDQ4LCJleHAiOjE2OTcwNDA4NDh9.Ab7G8ly5xbERafTTvgtdRcnR6dU-1NKGBFulUlkOnJI"
-
-
-
-
-let token = process.argv[2].replace('token=', '')
-let playerId = process.argv[3].replace('playerId=', '')
-
 
 
 
@@ -42,16 +35,11 @@ socket.on('disconnect', () => {
     console.error('disconnected');
 });
 
-socket.on('data', async (id, data) => {
-    if(playerId == id) {
+socket.on('data', async (data) => {
     await socketDataHandler(data);
-    console.log(data);}
-    console.log('КОСЯК')
 });
 
 async function socketDataHandler(data:any): Promise<void> {
-    console.log(`Received chunk: ${data}`);
-    console.log('playerId=', playerId)
     const messages = data.split('\r');
     data = messages.pop() ?? '';
     for (const messageStr of messages) {

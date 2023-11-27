@@ -14,8 +14,8 @@ export class RoomGateway {
             this.expectedPlayers = expectedPlayers;
     }
 
-    clientConnected(socket: Socket, playerId) {
-        const player = new SocketPlayer(socket, this.roomId, playerId)
+    clientConnected(socket: Socket) {
+        const player = new SocketPlayer(socket, this.roomId)
         if (!this.players.includes(player)) {
             this.players.push(player)
             console.log('roonId:', this.roomId)

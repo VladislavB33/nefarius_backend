@@ -33,11 +33,9 @@ export class GameService {
                 id: roomId,
             },
         });
-        console.log('game = ', game)
         const player = await this.playerRepository.findOne({
             where: { id: playerId },
         });
-        console.log('player = ', player)
 
         if (game.players.find(player => player.id === playerId)) {
             throw new HttpException('The player is already in the room', HttpStatus.BAD_REQUEST);

@@ -19,8 +19,6 @@ export class GameGateway implements OnGatewayConnection {
         const { token } = socket.handshake.query;
 
         const decodeToken = await this.authService.decodeToken(token);
-        
-        console.log('декодированный токен:', decodeToken)
         //проверять количество участников
         //проверять пользователя в комнате???
         const game = await this.gameRepository.findOne({
@@ -30,16 +28,11 @@ export class GameGateway implements OnGatewayConnection {
             },
         })
         // выкинуть пользователей если комната не собралась
-        await socket.join(decodeToken.roomId)
         if (!this.rooms[decodeToken.roomId]) {
             this.rooms[decodeToken.roomId] = new RoomGateway(decodeToken.roomId, game.players.length);
         }
-        const playerId = decodeToken.userId
 
-        this.rooms[decodeToken.roomId].clientConnected(socket, playerId);
-        // console.log('this.rooms:', this.rooms)
-        await this.server.to(decodeToken.roomId).emit('connected', `user ${decodeToken.userId} connected to room ${decodeToken.roomId}`)
-
+        this.rooms[decodeToken.roomId].clientConnected(socket);
     }
 
     @WebSocketServer() server: Server;

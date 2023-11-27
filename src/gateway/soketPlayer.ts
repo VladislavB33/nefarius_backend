@@ -9,7 +9,7 @@ import { PlayerStats } from '../gameengine/types'
 export class SocketPlayer implements User {
     socket: Socket;
     roomId: string
-    playerId
+
 
     data: string;
 
@@ -17,10 +17,9 @@ export class SocketPlayer implements User {
 
     pendingCommand: Method | null = null;
 
-    constructor(socket: Socket, roomId: string, playerId) {
+    constructor(socket: Socket, roomId: string) {
         this.socket = socket;
         this.roomId = roomId
-        this.playerId = playerId
         // eslint-disable-next-line no-underscore-dangle
         this.socket.on('data', (roomName, data) => {
             if (roomName === roomId) {
@@ -28,7 +27,7 @@ export class SocketPlayer implements User {
             }
         }        )
     }
-
+ 
 
     // eslint-disable-next-line no-underscore-dangle
     _socketDataHandler(bufer: string): void {
@@ -43,7 +42,7 @@ export class SocketPlayer implements User {
             const message: SocketMessage = JSON.parse(messageStr);
             if (message.method === this.pendingCommand && this.waitingFunction !== null) {
                 this.waitingFunction(message);
-            }
+            } 
         }
     }
 
@@ -64,21 +63,21 @@ export class SocketPlayer implements User {
     }
 
     async giveCards(cards: InventionCard[]): Promise<void> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.GIVE_CARDS, cards })}\r`));
         await this.waitForAnswer(Method.GIVE_CARDS);
     }
 
     async returnSpy(): Promise<Action> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.RETURN_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.RETURN_SPY);
         } while (answer.action === undefined);
-        return answer.action;
-    }
+        return answer.action; 
+    } 
 
     async placeSpy(): Promise<Action> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.SEND_SPY })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.SEND_SPY);
@@ -87,21 +86,21 @@ export class SocketPlayer implements User {
     }
 
     async setCoins(money: number): Promise<void> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.SET_MONEY, count: money })}\r`));
         await this.waitForAnswer(Method.SET_MONEY);
     }
 
     async takeOffCards(count: number): Promise<string[]> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.TAKE_OFF_CARDS, count })}\r`));
         let answer;
         do {
-            answer = await this.waitForAnswer(Method.TAKE_OFF_CARDS);
-        } while (answer.cardIds === undefined);
+            answer = await this.waitForAnswer(Method.TAKE_OFF_CARDS); 
+        } while (answer.cardIds === undefined); 
         return answer.cardIds;
     }
 
     async turn(): Promise<Turn> {
-        await this.socket.to(this.roomId).emit('data', this.playerId, (`${JSON.stringify({ method: Method.TURN })}\r`));
+        await this.socket.emit('data', (`${JSON.stringify({ method: Method.TURN })}\r`));
         let answer;
         do {
             answer = await this.waitForAnswer(Method.TURN);
